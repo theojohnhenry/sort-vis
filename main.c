@@ -4,10 +4,12 @@
 #include <stdio.h>
 #include <unistd.h>
 
+// rendering settings
 const int screen_width = 800;
 const int screen_height = 800;
 const float update_interval = 1.0f;
 
+//prototypes
 typedef struct {
     bool finished;
     int i;
@@ -15,15 +17,14 @@ typedef struct {
     int n;
     int *data;
 } bubble_sort_state;
-
-
-void draw_data(int data[], int n, bubble_sort_state *state);
-void seq_bubble_sort(int data[], int n, bubble_sort_state *state);
+void draw_data(bubble_sort_state *state);
+void seq_bubble_sort(bubble_sort_state *state);
 void swap(int* xp, int* yp);
 
 int main(int argc, char *argv[])
     {
 
+    //parses input and creates sort states
     if(argc<1){printf("bad input");return 1;}
     int n = argc-1;
 
@@ -32,49 +33,46 @@ int main(int argc, char *argv[])
 
     for(int i = 0; i < n; i++)
     {
-        printf("placing value %i into data slot %i \n", atoi(argv[i+1]), i);
         data[i] = atoi(argv[i + 1]);
     }
-
     bubble_sort_state bss = {false, 0, 0, n, data};
 
+    //rendering
     float time_counter = 0.0f;
     InitWindow(screen_width, screen_height, "PENIS WINDOW");
     SetTargetFPS(60);
-
     while (!WindowShouldClose()) 
     {
         time_counter += GetFrameTime();
         if(time_counter >= update_interval){
             time_counter = 0;
-            seq_bubble_sort(data, n, &bss);
+            seq_bubble_sort(&bss);
         }
-        draw_data(data, n, &bss);
+        draw_data(&bss);
     }    
-
     CloseWindow(); 
 
     return 0;
 }
 
-void draw_data(int data[], int n, bubble_sort_state *state)
-{
 
-    int current = state->i;
-    int passed = n - state->pass;
-    int staple_pixelwidth = screen_width/n;
+void draw_data(bubble_sort_state *s)
+{
+    int current = s->i;
+    int passed = s->n - s->pass;
+    int staple_pixelwidth = screen_width/s->n;
 
     BeginDrawing();
     ClearBackground(BLACK);
     int i;
-    for(i=0; i <= n-1; i++)
+    for(i=0; i <= s->n-1; i++)
     {
         Color current_color = RAYWHITE;
         if(i == current) {current_color = RED;}
-        if(i >= passed || state->finished) {current_color = GREEN;}
+        if(i >= passed || s->finished) {current_color = GREEN;}
 
         int current_posX = i*staple_pixelwidth;
-        int current_height = data[i] * 40;
+        int current_height = s->data[i] * 40;
 
         DrawRectangle(
                 current_posX , 
@@ -84,39 +82,37 @@ void draw_data(int data[], int n, bubble_sort_state *state)
                 current_color);
     }
 
-    DrawText(TextFormat("VAL = %i", data[current]), screen_width/2, screen_height/2 - 22, 22, RAYWHITE);
-    DrawText(TextFormat("I   = %i", current), screen_width/2, screen_height/2, 22, RAYWHITE);
+    DrawText(TextFormat("VAL = %i", s->data[current]), 0, 0, 20, RAYWHITE);
+    DrawText(TextFormat("I   = %i", current), 0, 20, 20, RAYWHITE);
     EndDrawing();
 }
 
-void seq_bubble_sort(int *data, int n, bubble_sort_state *state)
+void seq_bubble_sort(bubble_sort_state *s)
 {
 
-    if(state->finished)
+    if(s->finished)
     {
         return;
     }
 
-    int i = state->i;
-
-    if(data[i]>data[i+1])
+    int i = s->i;
+    if(s->data[i]>s->data[i+1])
     {
-        swap(&data[i], &data[i+1]);
+        swap(&s->data[i], &s->data[i+1]);
     }
+    s->i++;
 
-    state->i++;
+    int comparisons_this_pass = s->n - 1 - s->pass;
 
-    int comparisons_this_pass = n - 1 - state->pass;
-
-    if(state->i >= comparisons_this_pass)
+    if(s->i >= comparisons_this_pass)
     {
-        state->i = 0;
-        state->pass++;
+        s->i = 0;
+        s->pass++;
     }
     
-    if(state->pass >= n-1)
+    if(s->pass >= s->n-1)
     {
-        state->finished = true;
+        s->finished = true;
     }
 }
 
