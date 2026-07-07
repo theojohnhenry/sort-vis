@@ -6,7 +6,7 @@
 
 // rendering settings
 const int screen_width = 800;
-const int screen_height = 800;
+const int screen_height = 800; 
 const float update_interval = 1.0f;
 
 //prototypes
